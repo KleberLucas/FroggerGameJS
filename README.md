@@ -1,4 +1,4 @@
-# FroggerGameJS
+# FroggerGameJS - In Progress
 A simple frogger game made in pure JS
 
 Um jogo Frogger simples feito em JS Puro
