@@ -1,0 +1,320 @@
+<html>
+<head>
+	<meta charset="utf-8" />
+	<title>Frogger in Pure JS</title>
+	<style>
+		*{
+			padding: 0;
+			margin: 0;
+		}
+		canvas{
+			background: #eee;
+			display: block;
+			margin: 0 auto;
+			border-style: solid;
+			border-width: 2px 2px 2px 2px;
+		}
+		h2{
+			text-align: center;
+			font-family: Arial, Helvetica, sans-serif;
+		}
+	</style>
+</head>
+<body onload="startGame()">
+	<canvas id="myCanvas" width="800px" height="600px"></canvas>
+	<script>
+		obstaclesLV1 = [];
+		obstaclesLV2 = [];
+		obstaclesLV3 = [];
+		obstaclesLV4 = [];
+		function startGame(){
+			
+			myWorld.startGame();
+			
+			
+			//square = new component("rect", "red", myWorld.canvas.width/2 - 10, myWorld.canvas.height/2 - 10, undefined, 20,20);
+			base = new component("rect", "#2E4053", 0, myWorld.canvas.height-myWorld.canvas.height/10, undefined, myWorld.canvas.width, myWorld.canvas.height/10);
+			street = new component("rect", "#424949", 0, base.y - 60*4, undefined, myWorld.canvas.width, myWorld.canvas.height/10 * 4);
+			base2 = new component("rect", "#D0D3D4  ", 0, street.y - 60, undefined, myWorld.canvas.width, myWorld.canvas.height/10);
+			lake = new component("rect", "#5DADE2", 0, base2.y - 60*3, undefined, myWorld.canvas.width, myWorld.canvas.height/10 * 3);
+			goal = new component("rect", "#9A7D0A", 0, lake.y - 60, undefined, myWorld.canvas.width, myWorld.canvas.height/10);
+			
+			
+			player = new component("circle", "#186A3B", 38*10 + 20 , base.y + base.height/2, 20);
+			updateGame();
+			
+			
+		}
+		
+		
+		var myWorld = {
+			canvas : document.getElementById("myCanvas"),
+			startGame : function(){
+				this.context = this.canvas.getContext("2d");
+				this.frameCount = 0;
+				//Função Teclas
+				window.addEventListener('keydown', function(e){
+					//Trava tecla só pode mover quando é 0, e só é 0 quando solta
+					if(myWorld.keyPressed == 0 || myWorld.keyPressed == undefined){
+						myWorld.keyPressed = e.keyCode;
+						//alert(e.keyCode);
+						playerMove();
+					}
+					
+				})
+				//Função Teclas
+				window.addEventListener('keyup', function(e){
+					myWorld.keyPressed = 0;//Libera tecla
+				})
+			},
+			clear : function(){
+				this.context.clearRect(0,0, this.canvas.width, this.canvas.height);
+			},
+			stopInterval : function(interval){
+				clearInterval(interval);
+			}
+			
+		
+		}
+		
+		function component(type, color, x, y, radius, width, height){
+			this.width = width || undefined;
+			this.height = height || undefined;
+			this.radius = radius || undefined;
+			this.type = type;
+			this.x = x;
+			this.y = y;
+			this.update = function(){
+				ctx = myWorld.context;
+				ctx.fillStyle = color;
+				ctx.strokeStyle = "white";
+				if(this.type == "circle"){
+					ctx.beginPath();
+					ctx.arc(this.x, this.y, this.radius, 0, Math.PI*2);
+					ctx.fill();
+					ctx.closePath();
+					
+					ctx.beginPath();
+					ctx.arc(this.x, this.y, this.radius, 0, Math.PI*2);
+					ctx.stroke();
+					ctx.closePath();
+				}
+				else if(this.type == "rect"){
+					ctx.beginPath();
+					ctx.rect(this.x, this.y, this.width, this.height);
+					ctx.fill();
+					ctx.closePath();
+				}
+			}
+			//MOVING COMPONENT
+			this.move = function(directionX, directionY){
+				this.x += directionX;
+				this.y += directionY;
+			}
+			//COLLISION FUNCTION
+			this.crashWith = function(otherobj) {
+				var myleft = this.x;
+				var myright = this.x + (this.width);
+				var mytop = this.y;
+				var mybottom = this.y + (this.height);
+				var otherleft = otherobj.x;
+				var otherright = otherobj.x + (otherobj.width);
+				var othertop = otherobj.y;
+				var otherbottom = otherobj.y + (otherobj.height);
+				var crash = true;
+				//Se não colidir - Lembrando quanto menor o Y mais alto é - INVERTIDO
+				if ((mybottom < othertop) || (mytop > otherbottom) || (myright < otherleft) || (myleft > otherright)) {
+				  crash = false;
+				}
+				return crash;
+			}
+		}
+		
+		function playerMove(){
+		
+		/* USING KEY PRESSED EXAMPLE
+			if(myWorld.keyPressed == 97){
+				player.move(-24, 0);
+			}
+			if(myWorld.keyPressed == 100){
+				player.move(24,0);
+			}
+			
+			if(myWorld.keyPressed == 119){
+				player.move(0, -24);
+			}
+			if(myWorld.keyPressed == 115){
+				player.move(0, 24);
+			}
+			
+		*/
+		
+		//Moviment count = (canvas.width - player.radius*2) / 20 = 38
+			if(myWorld.keyPressed == 37){
+				//If you pass the border the frog appears on the other side
+				if(player.x <= player.radius)
+					player.x = myWorld.canvas.width - player.radius;
+				else
+					player.move(-38, 0);
+				
+			}
+			if(myWorld.keyPressed == 39){
+				//If you pass the border the frog appears on the other side
+				if(player.x >= myWorld.canvas.width - player.radius)
+					player.x = player.radius;
+				else
+					player.move(38,0);
+			}
+			
+			if(myWorld.keyPressed == 38){
+				player.move(0, -60);
+			}
+			if(myWorld.keyPressed == 40){
+				player.move(0, 60);
+			}
+		}
+		//DRAW BACKGROUND COMPONENTS
+		function drawBackground(){
+			base.update();
+			street.update();
+			base2.update();
+			lake.update();
+			goal.update();
+			//square.update();
+		}
+		
+		function drawText() {
+			myWorld.context.font = "16px Arial";
+			myWorld.context.fillStyle = "#0095DD";
+			myWorld.context.fillText("Obstacles LV1: " + obstaclesLV1.length, 8, 20);
+			myWorld.context.fillText("Obstacles LV2: " + obstaclesLV2.length, 8, 40);
+			myWorld.context.fillText("Obstacles LV3: " + obstaclesLV3.length, 150, 20);
+			myWorld.context.fillText("Obstacles LV4: " + obstaclesLV4.length, 150, 40);
+		}
+		
+		
+		function generateObstacles(){
+			var obstacleX, obstacleY, obstacleWidth, obstacleHeight;
+			
+			//GENERATE OBSTACLES LV1
+			if(myWorld.frameNumber == 1 || everyFrame(200)){
+				obstacleX = myWorld.canvas.width;
+				obstacleY = myWorld.canvas.height - 60*2;
+				obstacleWidth = 60;
+				obstacleHeight = 50;
+				obstacleY = obstacleY + ((60 - obstacleHeight)/2); //Center the obstacle in its level
+				obstaclesLV1.push(new component("rect", "white", obstacleX, obstacleY, undefined, obstacleWidth,obstacleHeight));
+			}
+			
+			//GENERATE OBSTACLES LV2
+			if(everyFrame(250)){
+				obstacleX = 0;
+				obstacleY = myWorld.canvas.height - 60*3;
+				obstacleWidth = 100;
+				obstacleHeight = 40;
+				obstacleY = obstacleY + ((60 - obstacleHeight)/2); //Center the obstacle in its level
+				obstaclesLV2.push(new component("rect", "#ff9999", -obstacleWidth, obstacleY, undefined, obstacleWidth, obstacleHeight));
+			}
+			
+			//GENERATE OBSTACLES LV3
+			
+			if(everyFrame(400)){
+				obstacleX = myWorld.canvas.width;
+				obstacleY = myWorld.canvas.height - 60*4;
+				obstacleWidth = 80;
+				obstacleHeight = 35;
+				obstacleY = obstacleY + ((60 - obstacleHeight)/2); //Center the obstacle in its level
+				obstaclesLV3.push(new component("rect", "#990073", obstacleX, obstacleY, undefined, obstacleWidth, obstacleHeight));
+				obstaclesLV3.push(new component("rect", "#990073", obstacleX + obstacleWidth + 30, obstacleY, undefined, obstacleWidth, obstacleHeight));
+				obstaclesLV3.push(new component("rect", "#990073", obstacleX + obstacleWidth * 2 + 60, obstacleY, undefined, obstacleWidth, obstacleHeight));
+			}
+			
+			//GENERATE OBSTACLES LV4
+			
+			if(everyFrame(250)){
+				obstacleX = 0;
+				obstacleY = myWorld.canvas.height - 60*5;
+				obstacleWidth = 60;
+				obstacleHeight = 50;
+				obstacleY = obstacleY + ((60 - obstacleHeight)/2); //Center the obstacle in its level
+				obstaclesLV4.push(new component("rect", "#b36b00", -obstacleWidth, obstacleY, undefined, obstacleWidth, obstacleHeight));
+				obstaclesLV4.push(new component("rect", "#b36b00", -obstacleWidth * 2 - 40, obstacleY, undefined, obstacleWidth, obstacleHeight));
+				obstaclesLV4.push(new component("rect", "#b36b00", -obstacleWidth * 3 - 150, obstacleY, undefined, obstacleWidth, obstacleHeight));
+			}
+		}
+		
+		function moveObstacles(){
+			//MOVE OBSTACLESLV1
+			for(i = 0; i < obstaclesLV1.length; i++){
+				obstaclesLV1[i].move(-1, 0);
+				obstaclesLV1[i].update();
+				
+			}
+			
+			//MOVE OBSTACLESLV2
+			for(j = 0; j< obstaclesLV2.length; j++){
+				obstaclesLV2[j].move(1.2, 0);
+				obstaclesLV2[j].update();
+			}
+			
+			//MOVE OBSTACLESLV3
+			for(k = 0; k < obstaclesLV3.length; k++){
+				obstaclesLV3[k].move(-1.2, 0);
+				obstaclesLV3[k].update();
+			}
+			
+			//MOVE OBSTACLESLV4
+			for(l = 0; l < obstaclesLV4.length; l++){
+				obstaclesLV4[l].move(2, 0);
+				obstaclesLV4[l].update();
+			}
+			
+			//CHECK AND CLEAR OBSTACLESLV1
+			if(obstaclesLV1.length > 1)
+				if(obstaclesLV1[0].x < 0 - obstaclesLV1[0].width)
+					obstaclesLV1.shift();
+				
+				
+			//CHECK AND CLEAR OBSTACLESLV2
+			if(obstaclesLV2.length > 1)
+				if(obstaclesLV2[0].x > myWorld.canvas.width)
+					obstaclesLV2.shift();
+			
+			//CHECK AND CLEAR OBSTACLESLV3
+			if(obstaclesLV3.length > 1)
+				if(obstaclesLV3[0].x < 0 - obstaclesLV3[0].width)
+					obstaclesLV3.shift();
+					
+			//CHECK AND CLEAR OBSTACLESLV4
+			if(obstaclesLV4.length > 1)
+				if(obstaclesLV4[0].x > myWorld.canvas.width)
+					obstaclesLV4.shift();
+		}
+		
+		
+		function everyFrame(n) {
+			if(myWorld.frameCount % n == 0){
+				return true;
+			}
+			return false;
+		}
+		
+		function updateGame(){
+			myWorld.clear();
+			myWorld.frameCount += 1;
+			drawBackground();
+			generateObstacles();
+			moveObstacles();
+			player.update();
+			drawText();
+			
+			
+			requestAnimationFrame(updateGame);
+			
+		}
+	</script>
+	<span><h2>Kleber Lucas' Simple Classic Frogger Game in Pure JS</h2></span>
+	
+</body>
+	
+</html>
