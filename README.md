@@ -5,7 +5,11 @@ Um jogo Frogger simples feito em JS Puro
 
 _This project was developed using canvas and pure Javascript, without the use of pluggins or frameworks._
 
+_My inspiration for the creation of the project was the version of Atari 2600._
+
 _Este projeto foi desenvolvido usando canvas e Javascript puro, sem a utilização de pluggins ou frameworks._
+
+_A minha inspiração para criação do projeto foi a versão de Atari 2600._
 
 ### Current appearance of the game | Aparencia atual do jogo
 
