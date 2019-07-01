@@ -28,6 +28,7 @@ Para rodar o jogo você só precisa usar seu navegador favorito.
 - [X] Implement generation of street obstacles
 - [X] Clear enemies when they leave the screen
 - [ ] Implement generation of water obstacles
+- [ ] Implement colissions of obstacles
 - [ ] Implement lives
 - [ ] Implement score and wins
 - [ ] Optimize Code
